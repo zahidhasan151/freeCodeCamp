@@ -1,6 +1,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-
+const Sentry = require('@sentry/node');
 const _ = require('lodash');
 const Rx = require('rx');
 const loopback = require('loopback');
@@ -11,6 +11,15 @@ const createDebugger = require('debug');
 const { setupPassport } = require('./component-passport');
 
 const log = createDebugger('fcc:server');
+
+if (process.env.SENTRY_DSN === 'dsn_from_sentry_dashboard') {
+  log('Sentry reporting disabled unless DSN is provided.');
+} else {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN
+  });
+}
+
 // force logger to always output
 // this may be brittle
 log.enabled = true;
