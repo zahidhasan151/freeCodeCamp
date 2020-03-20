@@ -9,6 +9,7 @@ const expressState = require('express-state');
 const createDebugger = require('debug');
 
 const { setupPassport } = require('./component-passport');
+const { isHandledError } = require('./utils/create-handled-error.js');
 
 const log = createDebugger('fcc:server');
 
@@ -16,7 +17,10 @@ if (process.env.SENTRY_DSN === 'dsn_from_sentry_dashboard') {
   log('Sentry reporting disabled unless DSN is provided.');
 } else {
   Sentry.init({
-    dsn: process.env.SENTRY_DSN
+    dsn: process.env.SENTRY_DSN,
+    beforeSend(event, hint) {
+      return isHandledError(hint.originalException) ? null : event;
+    }
   });
 }
 
